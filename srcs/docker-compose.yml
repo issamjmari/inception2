@@ -1,0 +1,57 @@
+version: "3"
+services:
+  nginx-service:
+    depends_on:
+      - wordpress-service
+    container_name: nginxcont
+    build: ./requirements/nginx/
+    env_file:
+      - .env
+    volumes:
+      - wpVolume:/var/www/html
+    restart: on-failure
+    networks:
+      - net
+    ports:
+      - "443:443"
+  wordpress-service:
+    depends_on:
+      - maria-db
+    container_name: wpcont
+    build: ./requirements/wordpress/
+    env_file:
+      - .env
+    volumes:
+      - wpVolume:/var/www/html
+    restart: on-failure
+    expose:
+      - 9000
+    networks:
+      - net
+  maria-db:
+    container_name: mariacont
+    build: ./requirements/mariadb/
+    env_file:
+      - .env
+    volumes:
+      - mysql:/var/lib/mysql
+    restart: on-failure
+    expose:
+      - 3306
+    networks:
+      - net
+volumes:
+  wpVolume:
+    driver: local
+    driver_opts:
+        type: none
+        o: bind
+        device: /home/ijmari/data/wpVolume
+  mysql:
+    driver: local
+    driver_opts:
+        type: none
+        o: bind
+        device: /home/ijmari/data/mysql
+networks:
+  net:
